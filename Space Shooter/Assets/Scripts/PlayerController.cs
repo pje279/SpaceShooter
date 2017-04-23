@@ -26,7 +26,7 @@ public class PlayerController : MonoBehaviour
     private AudioSource shotSource;
     private SpaceGameController gameController;
     private int selectedWeapon;
-    private UpgradeMenu upgradeMenu;
+    //private UpgradeMenu upgradeMenu;
 
     /***************Functions***************/
 
@@ -50,7 +50,9 @@ public class PlayerController : MonoBehaviour
         {
             Debug.Log("Cannot find 'GameController' script");
         } //End if (gameController == null)
-        Debug.Log("Player Start() ran");
+        //Debug.Log("Player Start() ran");
+        
+        /*
         gameControllerObject = GameObject.FindWithTag("UpgradeMenu");
         if (gameControllerObject != null)
         {
@@ -62,6 +64,7 @@ public class PlayerController : MonoBehaviour
         {
             Debug.Log("Cannot find 'GameController' script");
         } //End if (gameController == null)
+        */
     } //End private void Start()
     /// <summary>
     /// 
@@ -153,21 +156,27 @@ public class PlayerController : MonoBehaviour
     /// <summary>
     /// 
     /// </summary>
+    /// <param name="amount"></param>
+    public void decreaseHealth(float amount)
+    {
+        currentHealth -= amount;
+    } //End public void decreaseHealth(float amount)
+    /// <summary>
+    /// 
+    /// </summary>
     /// <param name="increase"></param>
     public void increaseDamage(float increase)
     {
         damage += increase;
-        upgradeMenu.updateMenuText();
     } //End public void increaseDamage(float increase)
     /// <summary>
     /// 
     /// </summary>
     /// <param name="increase"></param>
-    public void increaseFireRate(float increase)
+    public void increaseFireRate(float decrease)
     {
-        fireRate += increase;
-        upgradeMenu.updateMenuText();
-    } //End public void increaseFireRate(float increase)
+        fireRate -= decrease;
+    } //End public void increaseFireRate(float decrease)
     /// <summary>
     /// 
     /// </summary>
@@ -175,7 +184,6 @@ public class PlayerController : MonoBehaviour
     public void increaseForce(float increase)
     {
         force += increase;
-        upgradeMenu.updateMenuText();
     } //End public void increaseForce(float increase)
     /// <summary>
     /// 
@@ -191,7 +199,6 @@ public class PlayerController : MonoBehaviour
     public void increaseHealth(float increase)
     {
         maxHealth += increase;
-        upgradeMenu.updateMenuText();
     } //End public void incraseHealth(float increase)
     /// <summary>
     /// 
@@ -200,7 +207,14 @@ public class PlayerController : MonoBehaviour
     public void increaseSpeed(float increase)
     {
         speed += increase;
-        upgradeMenu.updateMenuText();
+    } //End public void increaseSpeed(float increase)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="increase"></param>
+    public void increaseShield(float increase)
+    {
+        maxShield += increase;
     } //End 
     /// <summary>
     /// 

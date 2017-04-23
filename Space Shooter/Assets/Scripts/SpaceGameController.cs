@@ -34,6 +34,7 @@ public class SpaceGameController : MonoBehaviour
     private UpgradeMenu upgradeMenuController;
     private bool doubleBoltUnlocked, tripleBoltUnlocked;
     private int numAsteroidsDestroyed;
+    private bool midWave;
 
     /***************Functions***************/
 
@@ -56,13 +57,14 @@ public class SpaceGameController : MonoBehaviour
             Debug.Log("SpaceGameController: Cannot find 'PlayerController' script");
         } //End if (playerControllerObject != null)
 
-        playerControllerObject = GameObject.FindWithTag("UpgradeMenu");
-        if (playerControllerObject != null)
+        GameObject upgradeControllerObject = GameObject.FindWithTag("Canvas");
+        if (upgradeControllerObject != null)
         {
-            upgradeMenuController = playerControllerObject.GetComponent<UpgradeMenu>();
+            //Debug.Log("playerControllerObject != null");
+            upgradeMenuController = upgradeMenu.GetComponent<UpgradeMenu>();
         } //End if (playerControllerObject != null)
 
-        if (playerControllerObject == null)
+        if (upgradeControllerObject == null)
         {
             Debug.Log("SpaceGameController: Cannot find 'UpgradeMenu' script");
         } //End if (playerControllerObject != null)
@@ -102,6 +104,8 @@ public class SpaceGameController : MonoBehaviour
         doubleBoltUnlocked = false;
         tripleBoltUnlocked = false;
 
+        midWave = false;
+
         numAsteroidsDestroyed = 0;
     } //End private void initVars()
     /// <summary>
@@ -139,7 +143,16 @@ public class SpaceGameController : MonoBehaviour
                 SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             } //End if (Input.GetKeyDown(KeyCode.R))
         } //End if (restart)
+
+        if (midWave)
+        {
+            upgradeMenuOpen = false;
+            upgradeMenu.SetActive(upgradeMenuOpen);
+        } //End 
     } //End private void Update()
+    /// <summary>
+    /// 
+    /// </summary>
     private void showMainMenu()
     {
         mainMenu.SetActive(mainMenuOpen);
@@ -165,6 +178,7 @@ public class SpaceGameController : MonoBehaviour
     /// <returns></returns>
     private IEnumerator SpawnWaves()
     {
+        midWave = true;
         yield return new WaitForSeconds(startWait);
 
         while (true)
@@ -228,6 +242,7 @@ public class SpaceGameController : MonoBehaviour
             } //End else
               //Debug.Log("hazardCount: " + hazardCount);
 
+            midWave = false;
             StartCoroutine(showUpgradeMenu());
             yield return new WaitUntil(() => !upgradeMenuOpen);
         } //End while (true)
@@ -386,6 +401,8 @@ public class SpaceGameController : MonoBehaviour
 
         yield return new WaitUntil(() => !upgradeMenuOpen);
 
+        Debug.Log("upgradeMenuOpen == " + upgradeMenuOpen);
+
         upgradeMenu.SetActive(upgradeMenuOpen);
         updateScore();
         updateWave();
@@ -397,6 +414,7 @@ public class SpaceGameController : MonoBehaviour
     {
         upgradeMenuOpen = true;
         upgradeMenu.SetActive(upgradeMenuOpen);
+        upgradeMenuController.updateMenuText();
         scoreText.text = "";
         waveText.text = "";
 
@@ -404,7 +422,9 @@ public class SpaceGameController : MonoBehaviour
     } //End private void initUpgradeMenu()
 
     /***************Public***************/
-
+    /// <summary>
+    /// 
+    /// </summary>
     public void startGameFromBtn()
     {
         gameStarted = true;

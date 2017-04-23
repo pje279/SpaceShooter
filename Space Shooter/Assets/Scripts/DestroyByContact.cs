@@ -13,6 +13,7 @@ public class DestroyByContact : MonoBehaviour
 
     //Private vars
     private SpaceGameController gameController;
+    private PlayerController playerController;
     private Rigidbody rb;
     private float speedReduction;
 
@@ -21,6 +22,17 @@ public class DestroyByContact : MonoBehaviour
     /***************Private***************/
     private void Start()
     {
+        GameObject playerControllerObject = GameObject.FindWithTag("Player");
+        if (playerControllerObject != null)
+        {
+            playerController = playerControllerObject.GetComponent<PlayerController>();
+        } //End if (playerControllerObject != null)
+
+        if (playerControllerObject == null)
+        {
+            Debug.Log("SpaceGameController: Cannot find 'PlayerController' script");
+        } //End if (playerControllerObject != null)
+
         rb = GetComponent<Rigidbody>();
 
         GameObject gameControllerObject = GameObject.FindWithTag("GameController");
@@ -47,8 +59,8 @@ public class DestroyByContact : MonoBehaviour
         if (collision.gameObject.tag == "Asteroid")
         {
             Physics.IgnoreCollision(collision.collider, GetComponent<Collider>());
-        } //End 
-    } //End 
+        } //End if (collision.gameObject.tag == "Asteroid")
+    } //End private void OnCollisionEnter(Collision collision)
 
     private void OnTriggerEnter(Collider other)
     {
@@ -56,33 +68,41 @@ public class DestroyByContact : MonoBehaviour
         {
             Physics.IgnoreCollision(other, GetComponent<Collider>());
             return;
-        } //End 
+        } //End if (other.tag == "Asteroid")
         else if (other.tag == "Boundary")
         {
             return;
-        } //End 
+        } //End else if (other.tag == "Boundary")
 
         //Debug.Log(other);
 
-        
+
         if (other.tag == "Player")
         {
-            Instantiate(playerExplosion, transform.position, transform.rotation);
-            gameController.GameOver();
+            playerController.decreaseHealth(health);
+
+            if (playerController.getCurrentHealth() <= 0)
+            {
+                Instantiate(playerExplosion, transform.position, transform.rotation);
+                gameController.GameOver();
+            } //End if (playerController.getCurrentHealth() <= 0)
+            else
+            {
+                health = 0;
+            } //End else
         } //End if (other.tag == "Player")
         else
         {
             if (other.tag == "Primary Bolt")
             {
-                health -= 10;
+                health -= playerController.getDamage();
                 if (health > 0)
                 {
-                    //Vector3 speedReduction = new Vector3();
-                    speedReduction = (float)0.75;
+                    speedReduction = (float)0.2 + playerController.getForce();
                     rb.velocity = rb.velocity * speedReduction;
                     Instantiate(impact, transform.position, transform.rotation);
-                } //End 
-            } //End 
+                } //End if (health > 0)
+            } //End if (other.tag == "Primary Bolt")
         } //End else
 
         if (health <= 0)
@@ -90,9 +110,12 @@ public class DestroyByContact : MonoBehaviour
             Instantiate(explosion, transform.position, transform.rotation);
             Destroy(gameObject);
             gameController.AddScore(scoreValue);
-        } //End 
+        } //End if (health <= 0)
 
-        Destroy(other.gameObject);
+        if (playerController.getCurrentHealth() <= 0)
+        {
+            Destroy(other.gameObject);
+        } //End if (playerController.getCurrentHealth() <= 0)
     } //End private void OnTriggerEnter(Collider other)
 
 } //End public class NewBehaviourScript : MonoBehaviour
