@@ -147,6 +147,20 @@ public class PlayerController : MonoBehaviour
     /// <summary>
     /// 
     /// </summary>
+    public void resetStats()
+    {
+        speed = 10;
+        fireRate = (float)0.25;
+        damage = 10;
+        force = 0;
+        currentHealth = 10;
+        maxHealth = 10;
+        currentShield = 0;
+        maxShield = 0;
+    } //End public void resetStats()
+    /// <summary>
+    /// 
+    /// </summary>
     /// <param name="change"></param>
     public void setChangeSelectedWeapon(int change)
     {
@@ -160,7 +174,17 @@ public class PlayerController : MonoBehaviour
     public void decreaseHealth(float amount)
     {
         currentHealth -= amount;
+        gameController.updateHealth();
     } //End public void decreaseHealth(float amount)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="amount"></param>
+    public void decreaseShield(float amount)
+    {
+        currentShield -= amount;
+        gameController.updateShield();
+    } //End public void decreaseShield(float amount)
     /// <summary>
     /// 
     /// </summary>
@@ -190,8 +214,15 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void restoreHealth()
     {
-
+        currentHealth = maxHealth;
     } //End public void restoreHealth()
+    /// <summary>
+    /// 
+    /// </summary>
+    public void restoreShield()
+    {
+        currentShield = maxShield;
+    } //End public void restoreShield()
     /// <summary>
     /// 
     /// </summary>
@@ -215,7 +246,7 @@ public class PlayerController : MonoBehaviour
     public void increaseShield(float increase)
     {
         maxShield += increase;
-    } //End 
+    } //End public void increaseShield(float increase)
     /// <summary>
     /// 
     /// </summary>
@@ -236,10 +267,10 @@ public class PlayerController : MonoBehaviour
     /// 
     /// </summary>
     /// <returns></returns>
-    public float getcurrentShield()
+    public float getCurrentShield()
     {
         return currentShield;
-    } //End public float getcurrentShield()
+    } //End public float getCurrentShield()
     /// <summary>
     /// 
     /// </summary>

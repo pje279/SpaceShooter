@@ -7,34 +7,28 @@ using UnityEngine.UI;
 public class SpaceGameController : MonoBehaviour
 {
     //Public vars
-    public GameObject hazard1;
-    public GameObject hazard2;
-    public GameObject hazard3;
+    public GameObject hazard1, hazard2, hazard3;
     public Vector3 spawnValues;
     public int hazardCount;
-    public float spawnWait;
-    public float startWait;
-    public float waveWait;
+    public float spawnWait, startWait, waveWait;
     public float simultaneousSpawnWait;
-    public GUIText scoreText;
-    public GUIText restartText;
-    public GUIText gameOverText;
-    public GUIText waveText;
-    public GameObject mainMenu;
-    public GameObject upgradeMenu;
+    public GUIText scoreText, restartText, gameOverText;
+    public GUIText waveText, healthText, shieldText;
+    public GameObject mainMenu, upgradeMenu;
+    public GameObject player;
 
     //Private vars
     private bool startGame, gameStarted, gamePaused, mainMenuOpen, upgradeMenuOpen;
     private int score;
     private bool gameOver, restart;
     private int currentWave, wavesPassed;
-    private int simultaneousSpawns;
-    private int curNumSpawnedHazards;
+    private int simultaneousSpawns, curNumSpawnedHazards;
     private PlayerController playerController;
     private UpgradeMenu upgradeMenuController;
     private bool doubleBoltUnlocked, tripleBoltUnlocked;
     private int numAsteroidsDestroyed;
     private bool midWave;
+    private bool playerHasShield;
 
     /***************Functions***************/
 
@@ -88,6 +82,9 @@ public class SpaceGameController : MonoBehaviour
         restartText.text = "";
         restart = false;
 
+        healthText.text = "";
+        shieldText.text = "";
+
         startGame = false;
         gameStarted = false;
 
@@ -105,6 +102,8 @@ public class SpaceGameController : MonoBehaviour
         tripleBoltUnlocked = false;
 
         midWave = false;
+
+        playerHasShield = false;
 
         numAsteroidsDestroyed = 0;
     } //End private void initVars()
@@ -140,7 +139,17 @@ public class SpaceGameController : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.R))
             {
-                SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+                player.GetComponent<Transform>().position = new Vector3(0, 0, 4);
+                player.SetActive(true);
+
+                clearAsteroids();
+                hazardCount = 25;
+                initVars();
+                upgradeMenuController.resetMenu();
+                playerController.resetStats();
+                startGameFromBtn();
+
+                //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             } //End if (Input.GetKeyDown(KeyCode.R))
         } //End if (restart)
 
@@ -156,7 +165,7 @@ public class SpaceGameController : MonoBehaviour
     private void showMainMenu()
     {
         mainMenu.SetActive(mainMenuOpen);
-    } //End 
+    } //End private void showMainMenu()
     /// <summary>
     /// 
     /// </summary>
@@ -170,7 +179,10 @@ public class SpaceGameController : MonoBehaviour
     /// <param name="waveVal"></param>
     private void updateWave()
     {
-        waveText.text = "Wave: " + currentWave;
+        if (playerHasShield)
+        {
+            waveText.text = "Wave: " + currentWave;
+        } //End if (playerHasShield)
     } //End private void updateWave()
     /// <summary>
     /// 
@@ -188,10 +200,20 @@ public class SpaceGameController : MonoBehaviour
 
             for (int i = 0; i < hazardCount; i++)
             {
+                if (player.active != true)
+                {
+                    StopCoroutine(SpawnWaves());
+                } //End if (player.active != true)
+
                 if (simultaneousSpawns > 1 && curNumSpawnedHazards % currentWave == 0)
                 {
                     for (int j = 0; j < simultaneousSpawns; j++)
                     {
+                        if (player.active != true)
+                        {
+                            StopCoroutine(SpawnWaves());
+                        } //End if (player.active != true)
+
                         Vector3 spawnPosition = new Vector3(Random.Range(-spawnValues.x, spawnValues.x), spawnValues.y, spawnValues.z);
                         Quaternion spawnRotation = Quaternion.identity;
                         spawnAsteroid(spawnPosition, spawnRotation);
@@ -208,8 +230,13 @@ public class SpaceGameController : MonoBehaviour
                     spawnAsteroid(spawnPosition, spawnRotation);
                     curNumSpawnedHazards += 1;
                 } //End else
-                yield return new WaitForSeconds(spawnWait - (float)(wavesPassed * .06));
+                yield return new WaitForSeconds(spawnWait - (float)(wavesPassed * .035));
             } //End for (int i = 0; i < hazardCount; i++)
+
+            if (player.active != true)
+            {
+                StopCoroutine(SpawnWaves());
+            } //End if (player.active != true)
 
             if (hazardCount > 0)
             {
@@ -243,10 +270,16 @@ public class SpaceGameController : MonoBehaviour
               //Debug.Log("hazardCount: " + hazardCount);
 
             midWave = false;
-            StartCoroutine(showUpgradeMenu());
+            initUpgradeMenu();
+            //StartCoroutine(showUpgradeMenu());
             yield return new WaitUntil(() => !upgradeMenuOpen);
         } //End while (true)
     } //End void SpawnWaves()
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="rotation"></param>
     private void spawnAsteroid(Vector3 position, Quaternion rotation)
     {
         int spawnChance = Random.Range(0, 20);
@@ -334,7 +367,7 @@ public class SpaceGameController : MonoBehaviour
             Instantiate(hazard1, position, rotation);
         } //End else
         //*/
-    } //End 
+    } //End private void spawnAsteroid(Vector3 position, Quaternion rotation)
     /// <summary>
     /// 
     /// </summary>
@@ -406,6 +439,7 @@ public class SpaceGameController : MonoBehaviour
         upgradeMenu.SetActive(upgradeMenuOpen);
         updateScore();
         updateWave();
+
     } //End private IEnumerator showUpgradeMenu()
     /// <summary>
     /// 
@@ -414,12 +448,28 @@ public class SpaceGameController : MonoBehaviour
     {
         upgradeMenuOpen = true;
         upgradeMenu.SetActive(upgradeMenuOpen);
+        upgradeMenuController.Show();
+
         upgradeMenuController.updateMenuText();
         scoreText.text = "";
         waveText.text = "";
+        healthText.text = "";
+        shieldText.text = "";
 
         upgradeMenuController.updateMenuText();
     } //End private void initUpgradeMenu()
+    /// <summary>
+    /// 
+    /// </summary>
+    private void clearAsteroids()
+    {
+        GameObject[] asteroids = GameObject.FindGameObjectsWithTag("Asteroid");
+
+        for (int i = 0; i < asteroids.Length; i++)
+        {
+            Destroy(asteroids[i]);
+        } //End for (int i = 0; i < asteroids.Length; i++)
+    } //End GameObject[] asteroids = GameObject.FindGameObjectsWithTag("Asteroid");
 
     /***************Public***************/
     /// <summary>
@@ -433,8 +483,26 @@ public class SpaceGameController : MonoBehaviour
         mainMenu.SetActive(mainMenuOpen);
         updateScore();
         updateWave();
+        updateHealth();
         StartCoroutine(SpawnWaves());
     } //End public void startGameFromBtn()
+    /// <summary>
+    /// 
+    /// </summary>
+    public void updateHealth()
+    {
+        healthText.text = "Health: " + playerController.getCurrentHealth().ToString("G") + "/" + playerController.getMaxHealth().ToString("G");
+    } //End private void updateHealth()
+    /// <summary>
+    /// 
+    /// </summary>
+    public void updateShield()
+    {
+        if (playerHasShield)
+        {
+            shieldText.text = "Sheild: " + playerController.getCurrentShield().ToString("G") + "/" + playerController.getMaxShield().ToString("G");
+        } //End 
+    } //End public void updateShield()
     /// <summary>
     /// 
     /// </summary>
@@ -455,7 +523,7 @@ public class SpaceGameController : MonoBehaviour
             tripleBoltUnlocked = true;
             playerController.setChangeSelectedWeapon(3);
         } //End 
-    } //End 
+    } //End public void AddScore(int newScoreValue)
     /// <summary>
     /// 
     /// </summary>
@@ -472,7 +540,7 @@ public class SpaceGameController : MonoBehaviour
     public int subtractFromScore(int amount)
     {
         return score -= amount;
-    } //End 
+    } //End public int subtractFromScore(int amount)
     /// <summary>
     /// 
     /// </summary>
@@ -496,6 +564,13 @@ public class SpaceGameController : MonoBehaviour
     public void startNextWave()
     {
         upgradeMenuOpen = false;
+        playerController.restoreShield();
+
+        upgradeMenu.SetActive(upgradeMenuOpen);
+        updateScore();
+        updateWave();
+        updateHealth();
+        updateShield();
     } //End public void startNextWave()
     /// <summary>
     /// 
@@ -513,5 +588,19 @@ public class SpaceGameController : MonoBehaviour
     {
         return upgradeMenuOpen;
     } //End public bool getUpgradeMenuOpen()
+    /// <summary>
+    /// 
+    /// </summary>
+    public void gameStopped()
+    {
+
+    } //End public void gameStopped()
+    /// <summary>
+    /// 
+    /// </summary>
+    public void setPlayerHasShield()
+    {
+        playerHasShield = true;
+    } //End public void setPlayerHasShield()
 
 } //End public class GameController : MonoBehaviour

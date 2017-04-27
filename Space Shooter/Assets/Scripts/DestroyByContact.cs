@@ -8,7 +8,7 @@ public class DestroyByContact : MonoBehaviour
     public GameObject explosion;
     public GameObject playerExplosion;
     public int scoreValue;
-    public float health;
+    public float asteroidHealth;
     public GameObject impact;
 
     //Private vars
@@ -16,6 +16,7 @@ public class DestroyByContact : MonoBehaviour
     private PlayerController playerController;
     private Rigidbody rb;
     private float speedReduction;
+    private GameObject player;
 
     /***************Functions***************/
 
@@ -46,9 +47,22 @@ public class DestroyByContact : MonoBehaviour
             Debug.Log("Cannot find 'SpaceGameController' script");
         } //End if (gameController == null)
 
+        player = GameObject.FindWithTag("Player");
+        /*
+        if (playerObject != null)
+        {
+            gameController = playerObject.GetComponent<SpaceGameController>();
+        } //End if (playerObject != null)
+        */
+
+        if (player == null)
+        {
+            Debug.Log("Cannot find 'SpaceGameController' script");
+        } //End if (player == null)
+
         scoreValue += (int)((gameController.getCurrentWave() - 1) * 1.5);
 
-        health += gameController.getCurrentWave() + Random.Range(0, gameController.getCurrentWave()) % (gameController.getCurrentWave() * (float)0.85);
+        asteroidHealth += 1 + gameController.getCurrentWave() + Random.Range(0, gameController.getCurrentWave()) % (gameController.getCurrentWave() * (float)0.85);
 
         
         //Debug.Log("Health: " + health);
@@ -79,42 +93,57 @@ public class DestroyByContact : MonoBehaviour
 
         if (other.tag == "Player")
         {
-            playerController.decreaseHealth(health);
-
-            if (playerController.getCurrentHealth() <= 0)
+            if (playerController.getCurrentShield() > 0)
             {
-                Instantiate(playerExplosion, transform.position, transform.rotation);
-                gameController.GameOver();
-            } //End if (playerController.getCurrentHealth() <= 0)
+                if (playerController.getCurrentShield() >= asteroidHealth)
+                {
+                    Debug.Log("Just shield : " + asteroidHealth);
+                    playerController.decreaseShield(asteroidHealth);
+                } //End if (playerController.getCurrentShield() >= asteroidHealth)
+                else
+                {
+                    Debug.Log("Shield and health : " + asteroidHealth);
+                    playerController.decreaseHealth(asteroidHealth - playerController.getCurrentShield());
+                    playerController.decreaseShield(playerController.getCurrentShield());
+
+                    asteroidHealth = 0;
+                } //End else
+            } //End if (playerController.getCurrentShield() > 0)
             else
             {
-                health = 0;
-            } //End else
+                Debug.Log("Just health : " + asteroidHealth);
+                playerController.decreaseHealth(asteroidHealth);
+
+                asteroidHealth = 0;
+            } //End 
         } //End if (other.tag == "Player")
         else
         {
             if (other.tag == "Primary Bolt")
             {
-                health -= playerController.getDamage();
-                if (health > 0)
+                asteroidHealth -= playerController.getDamage();
+                if (asteroidHealth > 0)
                 {
-                    speedReduction = (float)0.2 + playerController.getForce();
+                    speedReduction = (float)0.85 - playerController.getForce();
                     rb.velocity = rb.velocity * speedReduction;
                     Instantiate(impact, transform.position, transform.rotation);
-                } //End if (health > 0)
+                } //End if (asteroidHealth > 0)
             } //End if (other.tag == "Primary Bolt")
         } //End else
 
-        if (health <= 0)
+        if (asteroidHealth <= 0)
         {
             Instantiate(explosion, transform.position, transform.rotation);
             Destroy(gameObject);
             gameController.AddScore(scoreValue);
-        } //End if (health <= 0)
+        } //End if (asteroidHealth <= 0)
 
         if (playerController.getCurrentHealth() <= 0)
         {
-            Destroy(other.gameObject);
+            Instantiate(playerExplosion, transform.position, transform.rotation);
+            gameController.GameOver();
+            player.SetActive(false);
+            //Destroy(other.gameObject);
         } //End if (playerController.getCurrentHealth() <= 0)
     } //End private void OnTriggerEnter(Collider other)
 

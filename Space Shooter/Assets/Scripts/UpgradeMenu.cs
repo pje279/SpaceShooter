@@ -45,7 +45,55 @@ public class UpgradeMenu : MonoBehaviour
         } //End if (gameController == null)
         */
 
+        Debug.Log("Trying to get the CanvasGroup");
         canvasGroup = self.GetComponent<CanvasGroup>();
+
+        if (canvasGroup == null)
+        {
+            Debug.Log("UpgradeMenu.cs: Couldn't find the CanvasGroup component");
+        } //End if (cavasGroup == null)
+
+        gameController = gameControllerObject.GetComponent<SpaceGameController>();
+
+        GameObject playerControllerObject = GameObject.FindWithTag("Player");
+        if (playerControllerObject != null)
+        {
+            player = playerControllerObject.GetComponent<PlayerController>();
+        } //End if (playerControllerObject != null)
+
+        if (playerControllerObject == null)
+        {
+            Debug.Log("Cannot find 'PlayerController' script");
+        } //End if (playerControllerObject != null)
+
+        /*
+        repairCost = calcRepairCost();
+        healthCost = 500;
+        speedCost = 500;
+        shieldCost = 750;
+
+        damageCost = 350;
+        fireRateCost = 400;
+        forceCost = 400;
+
+        healthLevel = speedLevel = shieldLevel = 0;
+        damageLevel = fireRateLevel = forceLevel = 0;
+        */
+
+        updateMenuText();
+    } //End private void Start()
+    /// <summary>
+    /// 
+    /// </summary>
+    private void Awake()
+    {
+        Debug.Log("Trying to get the CanvasGroup");
+        canvasGroup = self.GetComponent<CanvasGroup>();
+
+        if (canvasGroup == null)
+        {
+            Debug.Log("UpgradeMenu.cs: Couldn't find the CanvasGroup component");
+        } //End if (cavasGroup == null)
 
         gameController = gameControllerObject.GetComponent<SpaceGameController>();
 
@@ -61,19 +109,20 @@ public class UpgradeMenu : MonoBehaviour
         } //End if (playerControllerObject != null)
 
         repairCost = calcRepairCost();
-        healthCost = 1000;
-        speedCost = 1000;
-        shieldCost = 1250;
+        healthCost = 200;
+        speedCost = 250;
+        shieldCost = 250;
 
-        damageCost = 750;
-        fireRateCost = 750;
-        forceCost = 750;
+        damageCost = 150;
+        fireRateCost = 200;
+        forceCost = 250;
 
         healthLevel = speedLevel = shieldLevel = 0;
         damageLevel = fireRateLevel = forceLevel = 0;
 
+        calcMenuOptionsPrices();
         updateMenuText();
-    } //End private void Start()
+    } //End private void Awake()
     /// <summary>
     /// 
     /// </summary>
@@ -100,6 +149,10 @@ public class UpgradeMenu : MonoBehaviour
     /// <returns></returns>
     private int calcRepairCost()
     {
+        Debug.Log(
+            "CurHealth: " + player.getCurrentHealth() +
+            "MaxHealth: " + player.getMaxHealth()
+            );
         if (player.getCurrentHealth() == player.getMaxHealth())
         {
             return 0;
@@ -115,7 +168,7 @@ public class UpgradeMenu : MonoBehaviour
     /// <returns></returns>
     private int calcIncreaseHealth()
     {
-        return (int)(healthCost * (healthLevel + 1) * 1.5);
+        return (int)(healthCost * (healthLevel + 1) * (1 - 0.175 * (healthLevel + 1)));
     } //End private int calcIncreaseHealth()
     /// <summary>
     /// 
@@ -123,7 +176,7 @@ public class UpgradeMenu : MonoBehaviour
     /// <returns></returns>
     private int calcIncreaseSpeed()
     {
-        return speedCost * (speedLevel + 1);
+        return (int)(speedCost * (speedLevel + 1) * (1 - 0.175 * (speedLevel + 1)));
     } //End private int calcIncreaseSpeed()
     /// <summary>
     /// 
@@ -131,7 +184,7 @@ public class UpgradeMenu : MonoBehaviour
     /// <returns></returns>
     private int calcIncreaseShield()
     {
-        return (int)(shieldCost * (shieldLevel + 1) * 1.5);
+        return (int)(shieldCost * (shieldLevel + 1) * (1 - 0.175 * (shieldLevel + 1)));
     } //End private int calcIncreaseShield()
     /// <summary>
     /// 
@@ -139,7 +192,7 @@ public class UpgradeMenu : MonoBehaviour
     /// <returns></returns>
     private int calcIncreaseDamage()
     {
-        return (int)(damageCost * (damageLevel + 1) * 1.5);
+        return (int)(damageCost * (damageLevel + 1) * (1 - 0.175 * (damageLevel + 1)));
     } //Endprivate int calcIncreaseDamage()
     /// <summary>
     /// 
@@ -147,7 +200,7 @@ public class UpgradeMenu : MonoBehaviour
     /// <returns></returns>
     private int calcIncreaseFireRate()
     {
-        return (int)(fireRateCost * (fireRateLevel + 1) * 1.5);
+        return (int)(fireRateCost * (fireRateLevel + 1) * (1 - 0.175 * (fireRateLevel + 1)));
     } //End private int calcIncreaseFireRate()
     /// <summary>
     /// 
@@ -155,7 +208,7 @@ public class UpgradeMenu : MonoBehaviour
     /// <returns></returns>
     private int calcIncreaseForce()
     {
-        return (int)(forceCost * (forceLevel + 1) * 1.5);
+        return (int)(forceCost * (forceLevel + 1) * (1 - 0.175 * (forceLevel + 1)));
     } //End private int calcIncreaseForce()
     /// <summary>
     /// 
@@ -179,7 +232,7 @@ public class UpgradeMenu : MonoBehaviour
     private void updateSpeedCostText()
     {
         increaseSpeedTextBtn.text = speedCost + " Pts";
-        speedText.text = "Speed:  " + player.getSpeed().ToString();
+        speedText.text = "Speed:  " + player.getSpeed().ToString("F3");
     } //End private void updateSpeedCostText()
     /// <summary>
     /// 
@@ -187,7 +240,7 @@ public class UpgradeMenu : MonoBehaviour
     private void updateShieldCostText()
     {
         increaseShieldTextBtn.text = shieldCost + " Pts";
-        shieldText.text = "Shield:  " + player.getMaxShield().ToString();
+        shieldText.text = "Shield:  " + player.getMaxShield().ToString("F");
     } //End private void updateShieldCostText()
     /// <summary>
     /// 
@@ -195,7 +248,7 @@ public class UpgradeMenu : MonoBehaviour
     private void updateDamageCostText()
     {
         increaseDamageTextBtn.text = damageCost + " Pts";
-        damageText.text = "Damage:  " + player.getDamage().ToString();
+        damageText.text = "Damage:  " + player.getDamage().ToString("F3");
     } //End private void updateDamageCostText()
     /// <summary>
     /// 
@@ -203,7 +256,7 @@ public class UpgradeMenu : MonoBehaviour
     private void updateFireRateCostText()
     {
         increaseFireRateTextBtn.text = fireRateCost + " Pts";
-        fireRateText.text = "Fire Rate:  " + player.getFireRate().ToString();
+        fireRateText.text = "Fire Rate:  " + player.getFireRate().ToString("F3");
     } //End private void updateFireRateCostText()
     /// <summary>
     /// 
@@ -211,7 +264,7 @@ public class UpgradeMenu : MonoBehaviour
     private void updateForceCostText()
     {
         increaseForceTextBtn.text = forceCost + " Pts";
-        forceText.text = "Force:  " + player.getForce().ToString();
+        forceText.text = "Force:  " + player.getForce().ToString("F3");
     } //End private void updateForceCostText()
     /// <summary>
     /// 
@@ -220,6 +273,7 @@ public class UpgradeMenu : MonoBehaviour
     {
         repairCost = calcRepairCost();
         updateRepairCostText();
+        updatePointsAvailable();
     } //End private void updateRepairCost()
     /// <summary>
     /// 
@@ -228,6 +282,7 @@ public class UpgradeMenu : MonoBehaviour
     {
         healthCost = calcIncreaseHealth();
         updateHealthCostText();
+        updatePointsAvailable();
     } //End private void updateHealthCost()
     /// <summary>
     /// 
@@ -236,6 +291,7 @@ public class UpgradeMenu : MonoBehaviour
     {
         speedCost = calcIncreaseSpeed();
         updateSpeedCostText();
+        updatePointsAvailable();
     } //End private void updateSpeedCost()
     /// <summary>
     /// 
@@ -244,6 +300,7 @@ public class UpgradeMenu : MonoBehaviour
     {
         shieldCost = calcIncreaseShield();
         updateShieldCostText();
+        updatePointsAvailable();
     } //End private void updateShieldCost()
     /// <summary>
     /// 
@@ -252,6 +309,7 @@ public class UpgradeMenu : MonoBehaviour
     {
         damageCost = calcIncreaseDamage();
         updateDamageCostText();
+        updatePointsAvailable();
     } //End private void updateDamageCost()
     /// <summary>
     /// 
@@ -260,6 +318,7 @@ public class UpgradeMenu : MonoBehaviour
     {
         fireRateCost = calcIncreaseFireRate();
         updateFireRateCostText();
+        updatePointsAvailable();
     } //End private void updateFireRateCost()
     /// <summary>
     /// 
@@ -268,9 +327,37 @@ public class UpgradeMenu : MonoBehaviour
     {
         forceCost = calcIncreaseForce();
         updateForceCostText();
+        updatePointsAvailable();
     } //End private void updateForceCost()
+    /// <summary>
+    /// 
+    /// </summary>
+    private void updatePointsAvailable()
+    {
+        pointsText.text = gameController.getScore() + " Pts";
+    } //End private void updatePointsAvailable()
 
     /***************Public***************/
+    /// <summary>
+    /// 
+    /// </summary>
+    public void resetMenu()
+    {
+        repairCost = calcRepairCost();
+        healthCost = 200;
+        speedCost = 250;
+        shieldCost = 250;
+
+        damageCost = 150;
+        fireRateCost = 200;
+        forceCost = 250;
+
+        healthLevel = speedLevel = shieldLevel = 0;
+        damageLevel = fireRateLevel = forceLevel = 0;
+
+        calcMenuOptionsPrices();
+        updateMenuText();
+    } //End public void resetMenu()
     /// <summary>
     /// 
     /// </summary>
@@ -278,15 +365,16 @@ public class UpgradeMenu : MonoBehaviour
     {
         pointsText.text = gameController.getScore() + " Pts";
 
-        calcMenuOptionsPrices();
+        //calcMenuOptionsPrices();
 
         //Player Stats
+        
         healthText.text = "Health:  " + player.getCurrentHealth() + "/" + player.getMaxHealth();
-        shieldText.text = "Shield:  " + player.getMaxShield().ToString();
-        speedText.text = "Speed:  " + player.getSpeed().ToString();
-        damageText.text = "Damage:  " + player.getDamage().ToString();
-        fireRateText.text = "Fire Rate:  " + player.getFireRate().ToString();
-        forceText.text = "Force:  " + player.getForce().ToString();
+        shieldText.text = "Shield:  " + player.getMaxShield().ToString("F");
+        speedText.text = "Speed:  " + player.getSpeed().ToString("F3");
+        damageText.text = "Damage:  " + player.getDamage().ToString("F3");
+        fireRateText.text = "Fire Rate:  " + player.getFireRate().ToString("F3");
+        forceText.text = "Force:  " + player.getForce().ToString("F3");
 
         //Upgrade Options
         wave.text = "Wave " + gameController.getCurrentWave();
@@ -298,6 +386,14 @@ public class UpgradeMenu : MonoBehaviour
         increaseFireRateTextBtn.text = fireRateCost + " Pts";
         increaseForceTextBtn.text = forceCost + " Pts";
 
+        Debug.Log(
+            "Health level " + healthLevel +
+            "\nSpeed level " + speedLevel +
+            "\nShield level " + shieldLevel +
+            "\nDamage level " + damageLevel +
+            "\nFire Raate level " + fireRateLevel +
+            "\nForce level " + forceLevel
+            );
     } //End public void updateMenuText()
     /// <summary>
     /// 
@@ -331,7 +427,7 @@ public class UpgradeMenu : MonoBehaviour
     {
         if (gameController.getScore() >= healthCost)
         {
-            player.increaseHealth((player.getMaxHealth() * (float)(0.4 - 0.065 * healthLevel)) + gameController.getCurrentWave() * (float)1.5);
+            player.increaseHealth((int)((player.getMaxHealth() * (float)(0.4 - 0.065 * healthLevel)) + gameController.getCurrentWave() * (float)1.65));
             gameController.subtractFromScore(healthCost);
             healthLevel += 1;
             updateHealthCost();
@@ -367,7 +463,15 @@ public class UpgradeMenu : MonoBehaviour
     {
         if (gameController.getScore() >= shieldCost)
         {
-            player.increaseShield((player.getMaxShield() * (float)(0.4 - 0.07 * shieldLevel)) + gameController.getCurrentWave() * (float)1.65);
+            if (shieldLevel == 0)
+            {
+                player.increaseShield(10);
+                gameController.setPlayerHasShield();
+            } //End 
+            else
+            {
+                player.increaseShield((int)((player.getMaxShield() * (float)(0.4 - 0.07 * shieldLevel)) + gameController.getCurrentWave() * (float)1.5));
+            } //End else
             gameController.subtractFromScore(shieldCost);
             shieldLevel += 1;
             updateShieldCost();
@@ -385,7 +489,7 @@ public class UpgradeMenu : MonoBehaviour
     {
         if (gameController.getScore() >= damageCost)
         {
-            player.increaseDamage((player.getDamage() * (float)(0.35 - 0.065 * damageLevel) - gameController.getCurrentWave() * (float)0.005) + gameController.getCurrentWave() * (float)1.5);
+            player.increaseDamage((player.getDamage() * (float)(0.1 - 0.065 * damageLevel) - gameController.getCurrentWave() * (float)0.005) + gameController.getCurrentWave() * (float)1.5);
             gameController.subtractFromScore(damageCost);
             damageLevel += 1;
             updateDamageCost();
@@ -403,7 +507,7 @@ public class UpgradeMenu : MonoBehaviour
     {
         if (gameController.getScore() >= fireRateCost)
         {
-            player.increaseFireRate((player.getFireRate() * (float)(0.15 - 0.015 * fireRateLevel)) + gameController.getCurrentWave() * (float)1.5);
+            player.increaseFireRate((player.getFireRate() * (float)(0.0125 - 0.00175 * fireRateLevel)) + (float)0.0025 * (gameController.getCurrentWave() * (float)1.5));
             gameController.subtractFromScore(fireRateCost);
             fireRateLevel += 1;
             updateFireRateCost();
@@ -421,7 +525,7 @@ public class UpgradeMenu : MonoBehaviour
     {
         if (gameController.getScore() >= forceCost)
         {
-            player.increaseForce((player.getForce() * (float)(0.75 - 0.065 * forceLevel)) + (gameController.getCurrentWave() * (float).85) * (float)0.01);
+            player.increaseForce((player.getForce() * (float)(0.15 - 0.065 * forceLevel)) + (gameController.getCurrentWave() * (float)0.85) * (float)0.01);
             gameController.subtractFromScore(forceCost);
             forceLevel += 1;
             updateForceCost();
@@ -435,18 +539,18 @@ public class UpgradeMenu : MonoBehaviour
     /// <summary>
     /// 
     /// </summary>
-    void Hide()
+    public void Hide()
     {
         canvasGroup.alpha = 0f; //this makes everything transparent
         canvasGroup.blocksRaycasts = false; //this prevents the UI element to receive input events
-    } //End void Hide()
+    } //End public void Hide()
     /// <summary>
     /// 
     /// </summary>
-    void Show()
+    public void Show()
     {
         canvasGroup.alpha = 1f;
         canvasGroup.blocksRaycasts = true;
-    } //End void Show()
+    } //End public void Show()
 
 } //End public class UpgradeMenu : MonoBehaviour
