@@ -14,6 +14,7 @@ public class SpaceGameController : MonoBehaviour
     public float simultaneousSpawnWait;
     public GUIText scoreText, restartText, gameOverText;
     public GUIText waveText, healthText, shieldText;
+    public GUIText controlsText;
     public GameObject mainMenu, upgradeMenu;
     public GameObject player;
 
@@ -69,6 +70,13 @@ public class SpaceGameController : MonoBehaviour
     /// <summary>
     /// 
     /// </summary>
+    private void Awake()
+    {
+        Screen.SetResolution(600, 900, false);
+    } //End private void Awake()
+    /// <summary>
+    /// 
+    /// </summary>
     private void initVars()
     {
         scoreText.text = "";
@@ -81,6 +89,8 @@ public class SpaceGameController : MonoBehaviour
 
         restartText.text = "";
         restart = false;
+
+        controlsText.text = "";
 
         healthText.text = "";
         shieldText.text = "";
@@ -127,7 +137,7 @@ public class SpaceGameController : MonoBehaviour
                 pauseGame();
                 gamePaused = false;
             } //End if (gamePaused && !gameStarted)
-            else if (!gamePaused && !gameStarted)
+            else if (!gamePaused && gameStarted)
             {
                 pauseGame();
                 gamePaused = true;
@@ -145,12 +155,16 @@ public class SpaceGameController : MonoBehaviour
                 clearAsteroids();
                 hazardCount = 25;
                 initVars();
-                upgradeMenuController.resetMenu();
+                //upgradeMenuController.resetMenu();
                 playerController.resetStats();
                 startGameFromBtn();
 
                 //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             } //End if (Input.GetKeyDown(KeyCode.R))
+            else if (Input.GetKeyDown(KeyCode.Q))
+            {
+                quit();
+            } //End else if (Input.GetKeyDown(KeyCode.Q))
         } //End if (restart)
 
         if (midWave)
@@ -179,10 +193,7 @@ public class SpaceGameController : MonoBehaviour
     /// <param name="waveVal"></param>
     private void updateWave()
     {
-        if (playerHasShield)
-        {
-            waveText.text = "Wave: " + currentWave;
-        } //End if (playerHasShield)
+        waveText.text = "Wave: " + currentWave;
     } //End private void updateWave()
     /// <summary>
     /// 
@@ -219,7 +230,7 @@ public class SpaceGameController : MonoBehaviour
                         spawnAsteroid(spawnPosition, spawnRotation);
                         curNumSpawnedHazards += 1;
 
-                        yield return new WaitForSeconds(simultaneousSpawnWait);
+                        yield return new WaitForSeconds(simultaneousSpawnWait - (float)(wavesPassed * 0.0025));
                     } //End 
                     
                 } //End 
@@ -230,7 +241,7 @@ public class SpaceGameController : MonoBehaviour
                     spawnAsteroid(spawnPosition, spawnRotation);
                     curNumSpawnedHazards += 1;
                 } //End else
-                yield return new WaitForSeconds(spawnWait - (float)(wavesPassed * .035));
+                yield return new WaitForSeconds(spawnWait - (float)(wavesPassed * .065));
             } //End for (int i = 0; i < hazardCount; i++)
 
             if (player.active != true)
@@ -245,7 +256,7 @@ public class SpaceGameController : MonoBehaviour
 
             if (gameOver)
             {
-                restartText.text = "Press 'R' to restart";
+                restartText.text = "Press 'R' to restart\nPress 'Q' to quit";
                 restart = true;
                 break;
             } //End if (gameOVer)
@@ -470,6 +481,18 @@ public class SpaceGameController : MonoBehaviour
             Destroy(asteroids[i]);
         } //End for (int i = 0; i < asteroids.Length; i++)
     } //End GameObject[] asteroids = GameObject.FindGameObjectsWithTag("Asteroid");
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator hideControls()
+    {
+        controlsText.text = "WASD to move. Spacebar or\nleft mouse button to fire.";
+
+        yield return new WaitForSeconds((float)2.5);
+
+        controlsText.text = "";
+    } //End IEnumerator hideControls()
 
     /***************Public***************/
     /// <summary>
@@ -484,6 +507,7 @@ public class SpaceGameController : MonoBehaviour
         updateScore();
         updateWave();
         updateHealth();
+        StartCoroutine(hideControls());
         StartCoroutine(SpawnWaves());
     } //End public void startGameFromBtn()
     /// <summary>
@@ -513,12 +537,12 @@ public class SpaceGameController : MonoBehaviour
         numAsteroidsDestroyed += 1;
         updateScore();
 
-        if (score >= 1000 && !doubleBoltUnlocked)
+        if (score >= 10000 && !doubleBoltUnlocked)
         {
             doubleBoltUnlocked = true;
             playerController.setChangeSelectedWeapon(2);
         } //End 
-        else if (score >= 2500 && !tripleBoltUnlocked)
+        else if (score >= 25000 && !tripleBoltUnlocked)
         {
             tripleBoltUnlocked = true;
             playerController.setChangeSelectedWeapon(3);
@@ -602,5 +626,13 @@ public class SpaceGameController : MonoBehaviour
     {
         playerHasShield = true;
     } //End public void setPlayerHasShield()
+    /// <summary>
+    /// 
+    /// </summary>
+    public void quit()
+    {
+        Debug.Log("Trying to quit");
+        Application.Quit();
+    } //End public void quite
 
 } //End public class GameController : MonoBehaviour

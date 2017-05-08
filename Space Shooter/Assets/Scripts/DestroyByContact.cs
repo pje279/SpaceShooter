@@ -128,6 +128,8 @@ public class DestroyByContact : MonoBehaviour
                     rb.velocity = rb.velocity * speedReduction;
                     Instantiate(impact, transform.position, transform.rotation);
                 } //End if (asteroidHealth > 0)
+
+                Destroy(other);
             } //End if (other.tag == "Primary Bolt")
         } //End else
 

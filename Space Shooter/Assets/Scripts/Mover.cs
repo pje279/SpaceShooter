@@ -30,7 +30,7 @@ public class Mover : MonoBehaviour
         currentWave = gameController.getCurrentWave();
 
         rb = GetComponent<Rigidbody>();
-        rb.velocity = transform.forward * (speed - randomSpeedIncrease(currentWave) - ((currentWave * Random.Range(0, currentWave * 2)) % currentWave));
+        rb.velocity = transform.forward * (speed - randomSpeedIncrease(currentWave) - ((currentWave * Random.Range(0, currentWave * 2)) % currentWave) - (float)((currentWave - 1) * .55));
 	} //End void Start()
 	
     /// <summary>
@@ -42,7 +42,7 @@ public class Mover : MonoBehaviour
     {
         int spawnChance = Random.Range(0, 20);
 
-        if (wavesPassed < 5)
+        if (wavesPassed < 3)
         {
             if (spawnChance < 5)
             {
@@ -53,7 +53,7 @@ public class Mover : MonoBehaviour
                 return spawnChance % 2;
             } //End 
         } //End 
-        else if (wavesPassed < 10)
+        else if (wavesPassed < 5)
         {
             if (spawnChance < wavesPassed / 2 + (wavesPassed % 5) + 1)
             {
@@ -64,7 +64,7 @@ public class Mover : MonoBehaviour
                 return spawnChance % 3;
             } //End 
         } //End 
-        else if (wavesPassed < 15)
+        else if (wavesPassed < 7)
         {
             if (spawnChance < wavesPassed / 2 + (wavesPassed % 10) + 4)
             {
@@ -75,7 +75,7 @@ public class Mover : MonoBehaviour
                 return spawnChance % 4;
             } //End 
         } //End 
-        else if (wavesPassed < 20)
+        else if (wavesPassed < 10)
         {
             return spawnChance % 10;
         } //End 
